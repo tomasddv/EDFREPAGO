@@ -764,29 +764,40 @@ async function handleApi(req, res, db) {
 
 function runImport() {
   return new Promise((resolve, reject) => {
-    const exportChild = spawn("powershell.exe", ["-ExecutionPolicy", "Bypass", "-File", "scripts\\export-edf-sheets.ps1"], { cwd: __dirname, shell: false });
-    let exportStdout = "";
-    let exportStderr = "";
-    exportChild.stdout.on("data", (chunk) => exportStdout += chunk.toString());
-    exportChild.stderr.on("data", (chunk) => exportStderr += chunk.toString());
-    exportChild.on("error", reject);
-    exportChild.on("close", (exportCode) => {
-      if (exportCode !== 0) return reject(new Error(exportStderr || `Exportacion fallo con codigo ${exportCode}`));
-      const child = spawn(process.execPath, ["scripts\\import-edf-data.mjs"], { cwd: __dirname, shell: false });
+    const importEnv = { ...process.env };
+    if (!importEnv.EDF_SOURCE_DIR && importEnv.GOOGLE_DRIVE_FOLDER_URL) {
+      importEnv.EDF_SOURCE_DIR = path.join(__dirname, "data", "drive-source");
+    }
+    const steps = [];
+    if (process.env.GOOGLE_DRIVE_FOLDER_URL) {
+      steps.push(["sync", process.env.PYTHON || "python", ["scripts\\sync-google-drive.py"]]);
+    }
+    steps.push(["export", "powershell.exe", ["-ExecutionPolicy", "Bypass", "-File", "scripts\\export-edf-sheets.ps1"]]);
+    steps.push(["import", process.execPath, ["scripts\\import-edf-data.mjs"]]);
+
+    const outputs = {};
+    const runStep = (index) => {
+      if (index >= steps.length) {
+        try {
+          return resolve({ ...JSON.parse(outputs.import || "{}"), sincronizacion: outputs.sync?.trim(), exportacion: outputs.export?.trim() });
+        } catch {
+          return resolve({ output: outputs.import?.trim(), sincronizacion: outputs.sync?.trim(), exportacion: outputs.export?.trim() });
+        }
+      }
+      const [name, command, args] = steps[index];
+      const child = spawn(command, args, { cwd: __dirname, shell: false, env: importEnv });
       let stdout = "";
       let stderr = "";
       child.stdout.on("data", (chunk) => stdout += chunk.toString());
       child.stderr.on("data", (chunk) => stderr += chunk.toString());
       child.on("error", reject);
       child.on("close", (code) => {
-        if (code !== 0) return reject(new Error(stderr || `Importacion fallo con codigo ${code}`));
-        try {
-          resolve({ ...JSON.parse(stdout), exportacion: exportStdout.trim() });
-        } catch {
-          resolve({ output: stdout.trim(), exportacion: exportStdout.trim() });
-        }
+        if (code !== 0) return reject(new Error(stderr || `${name} fallo con codigo ${code}`));
+        outputs[name] = stdout;
+        runStep(index + 1);
       });
-    });
+    };
+    runStep(0);
   });
 }
 
