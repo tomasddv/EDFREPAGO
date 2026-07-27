@@ -1,0 +1,14 @@
+node_modules/
+npm-debug.log*
+
+server.out.log
+server.err.log
+
+data/
+imports/
+
+.env
+.env.*
+
+*.tmp
+*.bak
