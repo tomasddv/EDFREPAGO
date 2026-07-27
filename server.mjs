@@ -770,7 +770,7 @@ function runImport() {
     }
     const steps = [];
     if (process.env.GOOGLE_DRIVE_FOLDER_URL) {
-      steps.push(["sync", process.env.PYTHON || "python", ["scripts\\sync-google-drive.py"]]);
+      steps.push(["sync", process.env.PYTHON || "python", ["scripts\\sync_google_drive.py"]]);
     }
     steps.push(["export", "powershell.exe", ["-ExecutionPolicy", "Bypass", "-File", "scripts\\export-edf-sheets.ps1"]]);
     steps.push(["import", process.execPath, ["scripts\\import-edf-data.mjs"]]);

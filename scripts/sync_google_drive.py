@@ -3,9 +3,9 @@ import sys
 from pathlib import Path
 
 
-def main() -> int:
-    folder_url = os.environ.get("GOOGLE_DRIVE_FOLDER_URL", "").strip()
-    output_dir = Path(os.environ.get("EDF_SOURCE_DIR", "data/drive-source"))
+def sync_google_drive(folder_url: str | None = None, output_dir: str | Path | None = None) -> int:
+    folder_url = (folder_url or os.environ.get("GOOGLE_DRIVE_FOLDER_URL", "")).strip()
+    output_dir = Path(output_dir or os.environ.get("EDF_SOURCE_DIR", "data/drive-source"))
 
     if not folder_url:
         print("GOOGLE_DRIVE_FOLDER_URL no configurado; no se sincroniza Drive.")
@@ -32,9 +32,13 @@ def main() -> int:
         remaining_ok=True,
     )
 
-    total = len(downloaded or [])
-    print(f"Archivos sincronizados: {total}")
-    return 0
+    return len(downloaded or [])
+
+
+def main() -> int:
+    result = sync_google_drive()
+    print(f"Archivos sincronizados: {result}")
+    return 0 if result != 2 else 2
 
 
 if __name__ == "__main__":

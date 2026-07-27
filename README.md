@@ -70,7 +70,9 @@ Los datos generados quedan en `data/`, carpeta excluida de Git porque contiene i
 
 ## Notas para Streamlit
 
-Esta version esta construida con frontend React/JS vanilla y backend Node.js. Para publicarla en Streamlit hay que portar la interfaz y la logica a Python/Streamlit o dejar este repo como base de referencia y crear una app Streamlit separada.
+El repo incluye `streamlit_app.py` para que Streamlit Cloud pueda arrancar la aplicacion. Esta version inicial sincroniza Drive y muestra la base si existe `data/db.json`.
+
+La app Node sigue siendo la version operativa completa. El port Streamlit completo requiere migrar el importador de Excel/TXT a Python para no depender de Excel/PowerShell en la nube.
 
 ## Footer
 
