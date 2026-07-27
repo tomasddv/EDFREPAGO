@@ -19,6 +19,23 @@ Por defecto el servidor usa el puerto `5173`. Tambien se puede indicar un puerto
 node server.mjs 5193
 ```
 
+## Carpeta fuente
+
+Por defecto la app toma los archivos desde:
+
+```text
+N:\tomas\DASHBOARDS\REPAGO EDF
+```
+
+Tambien se puede cambiar sin tocar codigo usando la variable `EDF_SOURCE_DIR`:
+
+```powershell
+$env:EDF_SOURCE_DIR = "N:\tomas\DASHBOARDS\REPAGO EDF"
+node server.mjs 5193
+```
+
+En esa misma carpeta deben estar el semaforo, PI, clientes, EDF y los archivos de venta. El importador lee `venta.txt` como base y cualquier archivo `venta*.txt` adicional como venta diaria/reemplazo, priorizando el mas nuevo por periodo.
+
 ## Importar datos
 
 Desde la app usar el boton de importacion. El backend ejecuta:

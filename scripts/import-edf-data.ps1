@@ -1,5 +1,5 @@
 param(
-  [string]$SourceDir = "N:\Tomas\DASHBOARDS\REPAGO EDF",
+  [string]$SourceDir = $(if ($env:EDF_SOURCE_DIR) { $env:EDF_SOURCE_DIR } else { "N:\Tomas\DASHBOARDS\REPAGO EDF" }),
   [string]$OutputPath = "data\db.json"
 )
 

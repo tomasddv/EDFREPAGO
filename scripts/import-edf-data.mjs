@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { supervisorForPromoter } from "./supervisors.mjs";
 
-const sourceDir = "N:\\tomas\\DASHBOARDS\\REPAGO EDF";
+const sourceDir = process.env.EDF_SOURCE_DIR || "N:\\tomas\\DASHBOARDS\\REPAGO EDF";
 const stagingDir = path.join(process.cwd(), "data", "staging");
 const outputPath = path.join(process.cwd(), "data", "db.json");
 const now = new Date();
