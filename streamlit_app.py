@@ -4,10 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
-
-from scripts.sync_google_drive import sync_google_drive
 
 
 ROOT = Path(__file__).parent
@@ -16,7 +13,7 @@ DB_PATH = ROOT / "data" / "db.json"
 
 st.set_page_config(
     page_title="EDF Repago",
-    page_icon="📊",
+    page_icon="EDF",
     layout="wide",
 )
 
@@ -110,15 +107,10 @@ def render_dashboard(db: Dict[str, Any]) -> None:
     )
 
     if not filtered.empty:
-        grouped = (
-            filtered[filtered["Estado"] == "En PDV"]
-            .groupby("Negocio", as_index=False)
-            .agg(EDF=("EDF", "count"), RepagoPromedio=("% Repago", "mean"))
-        )
+        grouped = filtered[filtered["Estado"] == "En PDV"].groupby("Negocio")["% Repago"].mean()
         if not grouped.empty:
             st.subheader("Repago promedio por negocio")
-            fig = px.bar(grouped, x="Negocio", y="RepagoPromedio", color="Negocio", text_auto=".0f")
-            st.plotly_chart(fig, use_container_width=True)
+            st.bar_chart(grouped)
 
     st.subheader("Clientes")
     customer_df = pd.DataFrame(customers)
@@ -141,10 +133,15 @@ with st.sidebar:
         if not drive_url:
             st.error("Falta configurar GOOGLE_DRIVE_FOLDER_URL en Secrets.")
         else:
-            with st.spinner("Sincronizando archivos..."):
-                result = sync_google_drive(drive_url, source_dir)
-            st.success(f"Archivos sincronizados: {result}")
-            st.cache_data.clear()
+            try:
+                from scripts.sync_google_drive import sync_google_drive
+                with st.spinner("Sincronizando archivos..."):
+                    result = sync_google_drive(drive_url, source_dir)
+                st.success(f"Archivos sincronizados: {result}")
+                st.cache_data.clear()
+            except Exception as exc:
+                st.error("No se pudo sincronizar Google Drive.")
+                st.exception(exc)
 
 db = load_db()
 if db:
