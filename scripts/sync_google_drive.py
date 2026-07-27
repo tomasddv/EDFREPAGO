@@ -1,9 +1,10 @@
 import os
 import sys
 from pathlib import Path
+from typing import Optional, Union
 
 
-def sync_google_drive(folder_url: str | None = None, output_dir: str | Path | None = None) -> int:
+def sync_google_drive(folder_url: Optional[str] = None, output_dir: Optional[Union[str, Path]] = None) -> int:
     folder_url = (folder_url or os.environ.get("GOOGLE_DRIVE_FOLDER_URL", "")).strip()
     output_dir = Path(output_dir or os.environ.get("EDF_SOURCE_DIR", "data/drive-source"))
 

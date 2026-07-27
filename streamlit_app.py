@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 import pandas as pd
 import plotly.express as px
@@ -28,13 +29,13 @@ def secret_or_env(name: str, default: str = "") -> str:
 
 
 @st.cache_data(show_spinner=False)
-def load_db() -> dict | None:
+def load_db() -> Optional[Dict[str, Any]]:
     if not DB_PATH.exists():
         return None
     return json.loads(DB_PATH.read_text(encoding="utf-8"))
 
 
-def status_label(edf: dict) -> str:
+def status_label(edf: Dict[str, Any]) -> str:
     status = edf.get("status") or ""
     if status == "PDV":
         return "En PDV"
@@ -43,7 +44,7 @@ def status_label(edf: dict) -> str:
     return status.title() if status else "-"
 
 
-def repayment_pct(edf: dict) -> int:
+def repayment_pct(edf: Dict[str, Any]) -> int:
     repayment = edf.get("repayment") or {}
     try:
         return int(repayment.get("pct") or 0)
@@ -51,7 +52,7 @@ def repayment_pct(edf: dict) -> int:
         return 0
 
 
-def render_dashboard(db: dict) -> None:
+def render_dashboard(db: Dict[str, Any]) -> None:
     edfs = db.get("edfs", [])
     customers = db.get("customers", [])
     placed = [edf for edf in edfs if edf.get("status") == "PDV"]
@@ -122,7 +123,7 @@ def render_dashboard(db: dict) -> None:
     st.subheader("Clientes")
     customer_df = pd.DataFrame(customers)
     if not customer_df.empty:
-      st.dataframe(customer_df, use_container_width=True, hide_index=True)
+        st.dataframe(customer_df, use_container_width=True, hide_index=True)
 
 
 st.title("EDF Repago")
